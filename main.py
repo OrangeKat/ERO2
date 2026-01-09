@@ -95,4 +95,8 @@ if __name__ == "__main__":
     from src.scenarios.scenario5_comparison import compare_theory_sim
     compare_theory_sim()
 
+    print("\n[Case 6: Comparison Plots]")
+    from src.scenarios.scenario6_theory_plots import generate_comparison_plots
+    generate_comparison_plots()
+
     print("\nSimulation complete. Outputs are in 'output/' directory.")

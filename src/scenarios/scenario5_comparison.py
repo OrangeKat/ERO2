@@ -38,7 +38,7 @@ def compare_theory_sim():
     env = simpy.Environment()
     sim_mm1 = run_generic_sim(env, lam, 1, lambda: random.expovariate(mu), duration)
     mean_sim, _ = calculate_empirical_stats(sim_mm1)
-    mean_theory, _ = mm1_theory(lam, mu)
+    mean_theory = mm1_theory(lam, mu)["w"]
     print(f"  Simulation Mean: {mean_sim:.4f}")
     print(f"  Theoretical Mean: {mean_theory:.4f}")
     print(f"  Error: {abs(mean_sim - mean_theory)/mean_theory:.2%}")
@@ -50,7 +50,7 @@ def compare_theory_sim():
     env = simpy.Environment()
     sim_mmk = run_generic_sim(env, lam_k, k, lambda: random.expovariate(mu), duration)
     mean_sim, _ = calculate_empirical_stats(sim_mmk)
-    mean_theory, _ = mmk_theory(lam_k, mu, k)
+    mean_theory = mmk_theory(lam_k, mu, k)["w"]
     print(f"  Simulation Mean: {mean_sim:.4f}")
     print(f"  Theoretical Mean: {mean_theory:.4f}")
     print(f"  Error: {abs(mean_sim - mean_theory)/mean_theory:.2%}")
@@ -61,7 +61,7 @@ def compare_theory_sim():
     sim_mg1 = run_generic_sim(env, lam, 1, lambda: 1.0/mu, duration)
     mean_sim, _ = calculate_empirical_stats(sim_mg1)
     # For Constant service, var = 0
-    mean_theory, _ = mg1_theory(lam, mu, 0)
+    mean_theory = mg1_theory(lam, mu, 0)["w"]
     print(f"  Simulation Mean: {mean_sim:.4f}")
     print(f"  Theoretical Mean: {mean_theory:.4f}")
     print(f"  Error: {abs(mean_sim - mean_theory)/mean_theory:.2%}")
