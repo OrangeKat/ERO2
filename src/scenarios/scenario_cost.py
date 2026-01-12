@@ -2,21 +2,52 @@ import os
 import sys
 import simpy
 import numpy as np
-from src.simulation.engine import run_waterfall_sim
+import random
+from src.simulation.waterfall.finite import WaterfallMoulinetteFinite
+from src.models.basics import Utilisateur
 from src.utils.cost_analysis import CostAnalyzer, create_cost_config_aws_small
 from src.visualization.cost_plots import plot_cost_comparison, plot_scaling_analysis
+
+
+def create_users(n, promo_ratio=0.7):
+    users = []
+    for i in range(n):
+        promo = "ING" if random.random() < promo_ratio else "PREPA"
+        users.append(Utilisateur(name=f"USER{i}", promo=promo))
+    return users
+
+
+def run_test_for_k(k, num_users=30):
+    moulinette = WaterfallMoulinetteFinite(
+        K=k, 
+        process_time=2, 
+        result_time=1, 
+        ks=20, 
+        kf=10, 
+        tag_limit=5, 
+        nb_exos=5
+    )
+    users = create_users(num_users)
+    
+    for user in users:
+        moulinette.add_user(user)
+    
+    moulinette.env.process(moulinette.collect_metrics())
+    
+    for user in moulinette.users:
+        moulinette.env.process(moulinette.handle_commit(user))
+    
+    moulinette.env.run(until=None)
+    
+    return moulinette
 
 
 def analyze_server_costs():
     results_dir = "output/cost_analysis"
     os.makedirs(results_dir, exist_ok=True)
     
-    arrival_rate = 1.2
-    exec_rate = 0.4
-    front_rate = 2.0
-    ks = 20
-    kf = 10
-    duration = 5000
+    random.seed(42)
+    np.random.seed(42)
     
     cost_config = create_cost_config_aws_small()
     cost_config.simulation_duration_hours = 1.0
@@ -30,27 +61,27 @@ def analyze_server_costs():
     
     try:
         for num_servers in server_configs:
-            env = simpy.Environment()
-            sim = run_waterfall_sim(env, arrival_rate, num_servers, exec_rate, front_rate,
-                                   ks=ks, kf=kf, duration=duration)
+            moulinette = run_test_for_k(num_servers)
+            
+            metrics_obj = moulinette.metrics.calculate_metrics()
             
             metrics = {
                 "test_queue": {
-                    "blocking_rate": sim.exec_rejected / sim.total_requests if sim.total_requests > 0 else 0,
+                    "blocking_rate": metrics_obj["test_queue"]["blocking_rate"],
                 },
                 "result_queue": {
-                    "blocking_rate": sim.front_rejected / sim.total_requests if sim.total_requests > 0 else 0,
+                    "blocking_rate": metrics_obj["result_queue"]["blocking_rate"],
                 },
                 "sojourn_times": {
-                    "test_queue": {"avg": np.mean(sim.stay_times) * 0.3 / 60 if sim.stay_times else 0},
-                    "result_queue": {"avg": np.mean(sim.stay_times) * 0.1 / 60 if sim.stay_times else 0}
+                    "test_queue": {"avg": metrics_obj["sojourn_times"]["test_queue"]["avg"] / 60},
+                    "result_queue": {"avg": metrics_obj["sojourn_times"]["result_queue"]["avg"] / 60}
                 }
             }
             
             cost_result = analyzer.calculate_total_cost(
                 num_test_servers=num_servers,
                 metrics=metrics,
-                total_requests=sim.total_requests,
+                total_requests=moulinette.metrics.total_requests,
                 backup_enabled=False
             )
             

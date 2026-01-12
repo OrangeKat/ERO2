@@ -99,12 +99,16 @@ if __name__ == "__main__":
     from src.scenarios.scenario6_theory_plots import generate_comparison_plots
     generate_comparison_plots()
 
-    print("\n[Case 7: Cost Analysis - Scaling]")
+    print("\n[Case 7: Cost Analysis - Scaling W.Finite]")
     from src.scenarios.scenario_cost import analyze_server_costs
     analyze_server_costs()
 
     print("\n[Case 8: Cost Analysis - All Architectures]")
     from src.scenarios.scenario_all_architectures import compare_all_architectures
     compare_all_architectures()
+
+    print("\n[Case 9: Cost Analysis - Scaling All Architectures]")
+    from src.scenarios.scenario_all_scaling import analyze_all_architectures_scaling
+    analyze_all_architectures_scaling()
 
     print("\nSimulation complete. Outputs are in 'output/' directory.")
