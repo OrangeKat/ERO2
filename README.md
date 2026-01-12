@@ -34,6 +34,8 @@ La population ING (fréquente) "noie" la population PREPA (rare mais longue).
 
 ## Installation
 
+### Option 1 : Avec `uv` (recommandé)
+
 Ce projet utilise `uv` pour la gestion des dépendances et de l'environnement virtuel.
 
 1.  **Installer uv** (si pas déjà présent) :
@@ -46,6 +48,22 @@ Ce projet utilise `uv` pour la gestion des dépendances et de l'environnement vi
     uv venv venv
     source venv/bin/activate
     uv pip install -r requirements.txt
+    ```
+
+### Option 2 : Sans `uv` (Standard)
+
+Si vous préférez utiliser les outils Python standards :
+
+1.  **Créer l'environnement virtuel** :
+    ```bash
+    python3 -m venv venv
+    source venv/bin/activate
+    ```
+
+2.  **Installer les dépendances** :
+    ```bash
+    pip install --upgrade pip
+    pip install -r requirements.txt
     ```
 
 ## Utilisation
